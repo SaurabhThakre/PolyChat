@@ -17,8 +17,11 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:gravity="center"
-        android:text="Unlock Your World"
+        android:text="PolyChat"
         android:textSize="30sp"
+        android:typeface="monospace"
+        android:textStyle="bold|italic"
+
         android:textColor="@color/white"/>
 
     <EditText
@@ -28,7 +31,7 @@
         android:layout_height="@dimen/edit_text_box_height"
         android:layout_marginBottom="10dp"
         android:background="@android:color/white"
-        android:hint="Enter Email"
+        android:hint="Username"
         android:importantForAutofill="no"
         android:inputType="text"
         android:maxLines="1"
@@ -58,7 +61,10 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:text="@string/login" />
+        android:text="@string/login"
+
+
+        />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -75,7 +81,9 @@
             android:padding="10dp"
             android:text="Forgot Password?"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:typeface="monospace"
+            android:textStyle="bold|italic"/>
     </LinearLayout>
     <TextView
         android:paddingTop="80dp"
@@ -85,6 +93,9 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/click_here_to_register"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:typeface="monospace"
+        android:textStyle="bold|italic"
+        />
 
 </LinearLayout>
