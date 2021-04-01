@@ -8,4 +8,9 @@
     <string name="click_here_to_login">Click here to login</string>
     <string name="enter_password">enter password</string>
     <string name="register">PloyChat</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+
 </resources>

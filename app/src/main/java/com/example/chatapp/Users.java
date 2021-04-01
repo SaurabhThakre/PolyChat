@@ -1,15 +1,20 @@
 package com.example.chatapp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -27,6 +32,7 @@ import java.util.Iterator;
 public class Users extends AppCompatActivity {
     ListView usersList;
     TextView noUsersText;
+    ImageButton setting;
     ArrayList<String> al = new ArrayList<>();
     int totalUsers = 0;
     ProgressDialog pd;
@@ -38,8 +44,17 @@ public class Users extends AppCompatActivity {
 
         usersList = (ListView)findViewById(R.id.usersList);
         noUsersText = (TextView)findViewById(R.id.noUsersText);
-
+        setting = (ImageButton)findViewById(R.id.setingButton);
         pd = new ProgressDialog(Users.this);
+
+        //To access Language settings.
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Log.e("User Get",sharedPreferences.getString("english","not found"));
+
+
+        setting.setOnClickListener(v -> {
+            startActivity(new Intent(Users.this, SettingsActivity.class));
+        });
         pd.setMessage("Loading...");
         pd.show();
 
@@ -67,6 +82,7 @@ public class Users extends AppCompatActivity {
                 startActivity(new Intent(Users.this, Chat.class));
             }
         });
+
     }
 
     public void doOnSuccess(String s){
