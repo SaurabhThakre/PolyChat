@@ -1,5 +1,6 @@
 package com.example.chatapp;
 
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -52,7 +54,7 @@ public class Chat extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         layout = findViewById(R.id.layout1);
         layout_2 = findViewById(R.id.layout2);
         sendButton = findViewById(R.id.sendButton);
@@ -68,7 +70,7 @@ public class Chat extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 if(status != TextToSpeech.ERROR) {
-                    t1.setLanguage(Locale.US);
+                    t1.setLanguage(new Locale("hi"));
                 }
             }
         });
@@ -114,6 +116,7 @@ public class Chat extends AppCompatActivity {
                 else{
                     //addMessageBox(superMethod(message), 2);
 
+                if((sharedPreferences.getString("english","not found")).equals("hindi")){
                     FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
                             //from language
                             .setSourceLanguage(FirebaseTranslateLanguage.EN)
@@ -141,7 +144,40 @@ public class Chat extends AppCompatActivity {
                             });
                         }
                     });
-                    Log.e("Output text",s);
+                }
+                else{
+
+                    FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
+                            //from language
+                            .setSourceLanguage(FirebaseTranslateLanguage.HI)
+                            // to language
+                            .setTargetLanguage(FirebaseTranslateLanguage.EN)
+                            .build();
+
+                    final FirebaseTranslator translator = FirebaseNaturalLanguage.getInstance()
+                            .getTranslator(options);
+
+                    FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder()
+                            .build();
+
+
+                    translator.downloadModelIfNeeded(conditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        //            @Override
+                        public void onSuccess(Void aVoid) {
+                            translator.translate(message).addOnSuccessListener(new OnSuccessListener<String>() {
+                                //                    @Override
+                                public void onSuccess(String s) {
+                                    mTranslatedText=s;
+                                    addMessageBox(s.toString(), 2);
+                                    ttospeech=s;
+                                }
+                            });
+                        }
+                    });
+
+                }
+
+
 
 
                 }
