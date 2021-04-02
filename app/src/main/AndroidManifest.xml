@@ -20,6 +20,7 @@
         <activity android:name="com.example.chatapp.Login" />
         <activity android:name="com.example.chatapp.Chat" />
         <activity android:name="com.example.chatapp.Users" />
+        <activity android:name="com.example.chatapp.SettingsActivity" />
     </application>
 
 </manifest>
