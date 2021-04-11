@@ -1,22 +1,32 @@
 package com.example.chatapp;
 
+import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import com.firebase.client.ChildEventListener;
@@ -30,6 +40,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import android.speech.tts.TextToSpeech;
@@ -51,10 +62,106 @@ public class Chat extends AppCompatActivity {
     String ttospeech;
     String  mTranslatedText;
     String translateoption;
+    ImageButton imageButton;
+    EditText editText;
+    SpeechRecognizer speechRecognizer;
+    int count=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        imageButton=findViewById(R.id.speechtotext);
+        editText=findViewById(R.id.messageArea);
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO},1);
+        }
+        speechRecognizer= SpeechRecognizer.createSpeechRecognizer(this);
+        Intent speechRecognizerIntent= new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(count==0){
+                    imageButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_mic_24));
+                    //start listening
+                    speechRecognizer.startListening(speechRecognizerIntent);
+                    count=1;
+                }
+                else{
+                    imageButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_mic_off_24));
+                    //stop listening
+                    speechRecognizer.stopListening();
+                    count=0;
+                }
+            }
+        });
+
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle bundle) {
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+
+            }
+
+            @Override
+            public void onRmsChanged(float v) {
+
+            }
+
+            @Override
+            public void onBufferReceived(byte[] bytes) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+
+            }
+
+            @Override
+            public void onError(int i) {
+
+            }
+
+            @Override
+            public void onResults(Bundle bundle) {
+                ArrayList<String> data = bundle.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
+                editText.setText(data.get(0));
+            }
+
+            @Override
+            public void onPartialResults(Bundle bundle) {
+
+            }
+
+            @Override
+            public void onEvent(int i, Bundle bundle) {
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Log.e("User Get",sharedPreferences.getString("english","not found"));
          translateoption=sharedPreferences.getString("english","not found");
@@ -205,6 +312,23 @@ public class Chat extends AppCompatActivity {
             }
         });
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode==1){
+            if(grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this,"permission granted",Toast.LENGTH_SHORT);
+            }
+            else{
+                Toast.makeText(this,"permission Denied",Toast.LENGTH_SHORT);
+            }
+        }
+    }
+
+
+
+
 
     public void addMessageBox(String message, int type){
         TextView textView = new TextView(Chat.this);
