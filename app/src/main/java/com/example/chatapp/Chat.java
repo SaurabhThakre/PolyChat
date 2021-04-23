@@ -94,6 +94,7 @@ public class Chat extends AppCompatActivity {
                     imageButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_mic_off_24));
                     //stop listening
                     speechRecognizer.stopListening();
+
                     count=0;
                 }
             }
@@ -134,6 +135,11 @@ public class Chat extends AppCompatActivity {
             @Override
             public void onResults(Bundle bundle) {
                 ArrayList<String> data = bundle.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 editText.setText(data.get(0));
             }
 

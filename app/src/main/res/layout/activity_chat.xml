@@ -50,15 +50,18 @@
         android:layout_height="wrap_content"
         android:id="@+id/text_to_speech"
         android:text="Speak"
+        android:background="@color/colorPrimary"
 
         />
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="45dp"
+            android:layout_height="35dp"
             android:src="@drawable/ic_baseline_mic_off_24"
             android:layout_gravity="center"
            android:layout_marginLeft="25dp"
             android:id="@+id/speechtotext"
+            android:background="@color/colorPrimary"
+
             />
     </LinearLayout>
 </LinearLayout>
