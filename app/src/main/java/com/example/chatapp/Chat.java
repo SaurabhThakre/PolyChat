@@ -1,11 +1,17 @@
 package com.example.chatapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.renderscript.ScriptGroup;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -40,14 +46,21 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import android.speech.tts.TextToSpeech;
 import android.widget.Toast;
 
-import java.util.Locale;
+import org.tensorflow.lite.Interpreter;
 
+import java.util.Locale;
+import java.util.Random;
+//commit1
 //import static com.example.chatapp.Translate.*;
 
 public class Chat extends AppCompatActivity {
@@ -64,7 +77,14 @@ public class Chat extends AppCompatActivity {
     String translateoption;
     ImageButton imageButton;
     EditText editText;
-    SpeechRecognizer speechRecognizer;
+    Interpreter tflite;
+    String AudioSavePathInDevice = null;
+    MediaRecorder mediaRecorder ;
+    Random random ;
+    String RandomAudioFileName = "ABCDEFGHIJKLMNOP";
+    public static final int RequestPermissionCode = 1;
+    MediaPlayer mediaPlayer ;
+    Context context = this;
     int count=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +97,6 @@ public class Chat extends AppCompatActivity {
         {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO},1);
         }
-        speechRecognizer= SpeechRecognizer.createSpeechRecognizer(this);
-        Intent speechRecognizerIntent= new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
 
         imageButton.setOnClickListener(new View.OnClickListener() {
@@ -87,74 +105,52 @@ public class Chat extends AppCompatActivity {
                 if(count==0){
                     imageButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_mic_24));
                     //start listening
-                    speechRecognizer.startListening(speechRecognizerIntent);
+
                     count=1;
+
+
+                    AudioSavePathInDevice =
+                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                                    CreateRandomAudioFileName(5) + "AudioRecording.mp4";
+
+
+                    MediaRecorderReady();
+
+                    try {
+                        mediaRecorder.prepare();
+                        mediaRecorder.start();
+                    } catch (IllegalStateException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+
                 }
                 else{
                     imageButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_mic_off_24));
-                    //stop listening
-                    speechRecognizer.stopListening();
 
+                    if(mediaPlayer != null){
+                        mediaPlayer.stop();
+                        mediaPlayer.release();
+                        MediaRecorderReady();
+                    }
+                    String prediction = inference(AudioSavePathInDevice);
+                        editText.setText(prediction);
                     count=0;
+
                 }
             }
         });
 
 
-        speechRecognizer.setRecognitionListener(new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle bundle) {
-
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-
-            }
-
-            @Override
-            public void onRmsChanged(float v) {
-
-            }
-
-            @Override
-            public void onBufferReceived(byte[] bytes) {
-
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-
-            }
-
-            @Override
-            public void onError(int i) {
-
-            }
-
-            @Override
-            public void onResults(Bundle bundle) {
-                ArrayList<String> data = bundle.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                editText.setText(data.get(0));
-            }
-
-            @Override
-            public void onPartialResults(Bundle bundle) {
-
-            }
-
-            @Override
-            public void onEvent(int i, Bundle bundle) {
-
-            }
-        });
-
-
+           try {
+               tflite=new Interpreter(loadModelFile());
+           }catch (Exception e){
+               e.printStackTrace();
+           }
 
 
 
@@ -320,6 +316,23 @@ public class Chat extends AppCompatActivity {
     }
 
 
+    public  String inference(String s){
+        String output="";
+
+        tflite.run(s,output);
+        return output;
+    }
+
+
+    private MappedByteBuffer loadModelFile() throws IOException{
+        AssetFileDescriptor fileDescriptor = this.getAssets().openFd("converted_model.tflite");
+        FileInputStream fileInputStream = new  FileInputStream(fileDescriptor.getFileDescriptor());
+        FileChannel fileChannel=fileInputStream.getChannel();
+        long startOffSets = fileDescriptor.getStartOffset();
+        long declaredLength=fileDescriptor.getDeclaredLength();
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY,startOffSets,declaredLength);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode==1){
@@ -371,5 +384,26 @@ public class Chat extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
         t1.speak(s, TextToSpeech.QUEUE_FLUSH, null,null);
         //t1.speak(toSpeak);
+    }
+
+    public String CreateRandomAudioFileName(int string){
+        StringBuilder stringBuilder = new StringBuilder( string );
+        int i = 0 ;
+        while(i < string ) {
+            stringBuilder.append(RandomAudioFileName.
+                    charAt(random.nextInt(RandomAudioFileName.length())));
+
+            i++ ;
+        }
+        return stringBuilder.toString();
+    }
+
+
+    public void MediaRecorderReady(){
+        mediaRecorder=new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        mediaRecorder.setOutputFile(AudioSavePathInDevice);
     }
 }

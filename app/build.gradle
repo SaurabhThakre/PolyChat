@@ -15,6 +15,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        mlModelBinding true
     }
 
     compileOptions {
@@ -48,6 +49,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.5.0'
     implementation 'com.google.firebase:firebase-auth:19.4.0'
     implementation 'androidx.preference:preference:1.1.1'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.1.0-rc1'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0-rc1'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.2.0'
 
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
