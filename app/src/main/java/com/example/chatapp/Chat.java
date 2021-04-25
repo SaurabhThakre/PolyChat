@@ -261,7 +261,7 @@ public class Chat extends AppCompatActivity {
                                 });
                             }
                         });
-                        Log.e("Output text",s);
+                       // Log.e("Output text",s);
                     }
                     else{
                         FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
@@ -291,7 +291,7 @@ public class Chat extends AppCompatActivity {
                                 });
                             }
                         });
-                        Log.e("Output text",s);
+                        //Log.e("Output text",s);
                     }
 
 
