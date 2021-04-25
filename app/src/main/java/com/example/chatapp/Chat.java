@@ -137,6 +137,8 @@ public class Chat extends AppCompatActivity {
                 ArrayList<String> data = bundle.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
                 try {
                     Thread.sleep(5000);
+
+
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
